@@ -7,7 +7,7 @@ import requests
 def chatGPT(prompt):
 
     # Api key for chatGPT
-    openai_api_key = "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"
+    openai_api_key = ""
 
     #Error message if api is not found
     if openai_api_key is None:

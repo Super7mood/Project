@@ -7,7 +7,7 @@ prompt = "how many letter r in strawberry"
 
 client = anthropic.Anthropic(
     # defaults to os.environ.get("ANTHROPIC_API_KEY")
-    api_key="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", #api key code from https://docs.anthropic.com/en/api/getting-started
+    api_key="", #api key code from https://docs.anthropic.com/en/api/getting-started
 )
 
 def claude(prompt):
