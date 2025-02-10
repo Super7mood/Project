@@ -1,3 +1,6 @@
+// Ayoub comment:
+// To do: if possible try to comment as many lines as possible so it will look more nice and it will be easier for me to understand
+
 import { useState, useEffect } from "react";
 import { db } from "../firebase"; // ✅ Correct path based on your structure
 import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -60,7 +63,7 @@ function QuestionSubmission() {
   return (
     <div className="container">
       <h1>Ask AI-Checker Pro</h1>
-      
+
       {/* 🔹 Submission Form */}
       <form onSubmit={handleSubmit}>
         <input

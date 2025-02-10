@@ -1,4 +1,17 @@
-code/backend/__pycache__/
-venv/
+code/backend/llm/__pycache__/
+code/backend/llm/ayoub.py
+code/backend/venv/
+code/backend/firebase-adminsdk.json
+code/frontend/node_modules/
+code/frontend/.DS_Store
+code/datasets/preprocessingCode/.ipynb_checkpoints
+
+
+
+
+
+
+
+
 
 #mongodb://conormcq8:<db_password>@<hostname>/?ssl=true&replicaSet=atlas-npgogf-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0

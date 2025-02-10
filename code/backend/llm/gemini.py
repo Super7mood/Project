@@ -13,8 +13,10 @@
 
 import google.generativeai as genai
 
-def gemini(prompt):
-    genai.configure(api_key="")
-    model = genai.GenerativeModel("gemini-1.5-flash")
+def gemini(prompt,responseType="Give a normal response"):
+    genai.configure(api_key="AIzaSyD5hnOznfop7WzlHRoUiNBnltayVFL8kbw")
+    model = genai.GenerativeModel(
+        model_name="gemini-2.0-flash",
+        system_instruction=responseType)
     response = model.generate_content(prompt)
     return response.text[:-1] # this return the response from gemini and [:-1] is used to not include the new line character

@@ -1,13 +1,13 @@
 # the code to call chatgpt is from https://community.openai.com/t/how-do-i-call-chatgpt-api-with-python-code/554554/2
 
 import requests
-
+from prompt import prompts
 
 # This is function that sends a prompt to the chatgpt chatbot and recieved the answer
-def chatGPT(prompt):
+def chatGPT(prompt, responseType="Give a normal response"):
 
     # Api key for chatGPT
-    openai_api_key = ""
+    openai_api_key = "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"
 
     #Error message if api is not found
     if openai_api_key is None:
@@ -26,7 +26,7 @@ def chatGPT(prompt):
         "messages": [
             {
                 "role": "system",
-                "content": "You are a helpful assistant."
+                "content": responseType
             },
             {
                 "role": "user",
@@ -46,5 +46,3 @@ def chatGPT(prompt):
     # If it is not successful, return the error message
     print("Error:", response.status_code, response.text)
     return None
-
-

@@ -1,0 +1,6 @@
+Design (20)
+Implementation (40)
+Testing and Validation (20)
+Documentation (Technical Specification and User Guide) (10)
+Demonstration (5)
+Video Walk-through (5)

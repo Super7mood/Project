@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'llm')))
 
 # Import LLM models after modifying the path
-from chatGPT import chatGPT
-from gemini import gemini
-from claude import claude
+from llm.chatGPT import chatGPT
+from llm.gemini import gemini
+from llm.claude import claude
 
 from flask_cors import CORS
 

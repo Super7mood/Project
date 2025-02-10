@@ -1,0 +1,6 @@
+npm install
+npm i firebase
+
+
+// in my case, I had to also use this
+npm install react-scripts@latest
