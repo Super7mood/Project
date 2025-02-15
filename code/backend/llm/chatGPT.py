@@ -1,16 +1,21 @@
 # the code to call chatgpt is from https://community.openai.com/t/how-do-i-call-chatgpt-api-with-python-code/554554/2
 
+import os, sys, requests
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import requests
+from cmdCall import cmdCall
 from prompt import prompts
+from dotenv import load_dotenv
+load_dotenv()
 
 # This is function that sends a prompt to the chatgpt chatbot and recieved the answer
-def chatGPT(prompt, responseType="Give a normal response"):
+def chatGPT(prompt, responseType="Default"):
 
-    # Api key for chatGPT
-    openai_api_key = "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"
-
+    
+    #Load API keys from enironment variables
+    apiKey = os.getenv("CHATGPT_API_KEY")
     #Error message if api is not found
-    if openai_api_key is None:
+    if apiKey is None:
         raise ValueError("OpenAI API key is not set in environment variables.")
 
     #URL to connect to chatgpt
@@ -18,7 +23,7 @@ def chatGPT(prompt, responseType="Give a normal response"):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {openai_api_key}"
+        "Authorization": f"Bearer {apiKey}"
     }
 
     data = {
@@ -26,7 +31,7 @@ def chatGPT(prompt, responseType="Give a normal response"):
         "messages": [
             {
                 "role": "system",
-                "content": responseType
+                "content": prompts[responseType]
             },
             {
                 "role": "user",
@@ -46,3 +51,6 @@ def chatGPT(prompt, responseType="Give a normal response"):
     # If it is not successful, return the error message
     print("Error:", response.status_code, response.text)
     return None
+
+if __name__ == "__main__":
+    print(cmdCall(chatGPT))

@@ -1,17 +1,17 @@
 import os
-import pymongo
-from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-# Load environment variables from .env file
-load_dotenv()
+# Load Firebase Service Account Key
+cred = credentials.Certificate("serviceAccountKey.json")
 
-# Get MongoDB URI from .env
-MONGO_URI = os.getenv("MONGO_URI")
+firebase_admin.initialize_app(cred)
 
-# Connect to MongoDB Atlas
-client = pymongo.MongoClient(MONGO_URI)
-db = client["aicheckerpro"]  # Make sure the database is named 'aicheckerpro'
-responses_collection = db["ai_responses"]  # Collection for storing AI responses
-users_collection = db["users"]  # Collection for storing users
+# Initialize Firestore
+db = firestore.client()
 
-print("✅ Connected to MongoDB Atlas")
+# Collections
+responses_collection = db.collection("ai_responses")  # AI responses collection
+users_collection = db.collection("users")  # Users collection
+
+print("✅ Connected to Firestore")

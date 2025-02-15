@@ -5,28 +5,28 @@ import sys
 import datetime
 from dotenv import load_dotenv
 
-# Add the 'backend/llm' folder to the Python path explicitly
+# Add 'backend/llm' folder to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'llm')))
 
-# Import LLM models after modifying the path
-from llm.chatGPT import chatGPT
-from llm.gemini import gemini
-from llm.claude import claude
+# Import LLM models
+from llm.call import callChatBots
 
 from flask_cors import CORS
 
-# 🔹 Firestore Setup
+# Firestore Setup
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# Initialize Flask app
+# Initialize Flask
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-# Load environment variables from .env
+# Enable CORS for all routes or specify the frontend domain
+CORS(app, origins="http://localhost:3000")  # Ensure only frontend domain can access
+
+# Load environment from .env
 load_dotenv()
 
-# Initialize Firebase using the JSON key
+# Firebase JSON key
 cred = credentials.Certificate("firebase-adminsdk.json")  # Ensure this matches your file name
 firebase_admin.initialize_app(cred)
 
@@ -37,15 +37,12 @@ db = firestore.client()
 def home():
     return "<h1>Welcome to AI Checker Pro API</h1><p>Use the API endpoints to interact with the system.</p>"
 
-# ================================
-# 🔹 USER REGISTRATION (Firestore)
-# ================================
 @app.route("/register", methods=["POST"])
 def register_user():
     data = request.json
     email = data.get("email")
     password = data.get("password")
-
+    
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
@@ -60,16 +57,11 @@ def register_user():
     # Store user in Firestore
     db.collection("users").add({
         "email": email,
-        "password": hashed_password.decode('utf-8'),
-        "created_at": datetime.datetime.utcnow()
+        "password": hashed_password.decode('utf-8'),  # Store as string
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
     })
-
     return jsonify({"message": "User registered successfully!"}), 200
 
-
-# ================================
-# 🔹 USER LOGIN (Firestore)
-# ================================
 @app.route("/login", methods=["POST"])
 def login_user():
     data = request.json
@@ -90,66 +82,75 @@ def login_user():
     else:
         return jsonify({"message": "Incorrect password!"}), 400
 
-
-# ================================
-# 🔹 QUESTION SUBMISSION (Firestore)
-# ================================
 @app.route("/ask", methods=["POST"])
 def ask_question():
     data = request.json
-    email = data["email"]
-    question = data["question"]
+    question = data.get("question")
+    email = data.get("email", "default@example.com")  # Ensure email is provided if required
 
+    if not question:
+        return jsonify({"error": "No question provided"}), 400
+    llmResponses = callChatBots(question)
     # Get responses from each LLM model
-    chatgpt_response = chatGPT(question)
-    gemini_response = gemini(question)
-    claude_response = claude(question)
+    chatgpt_response = llmResponses["ChatGPT"][0]
+    gemini_response = llmResponses["Gemini"][0]
+    claude_response = llmResponses["Claude"][0]
 
-    # Store the question and responses in Firestore
+    # Ensure responses are valid strings
+    chatgpt_response = chatgpt_response if isinstance(chatgpt_response, str) else str(chatgpt_response)
+    gemini_response = gemini_response if isinstance(gemini_response, str) else str(gemini_response)
+    claude_response = claude_response if isinstance(claude_response, str) else str(claude_response)
+
+    # Scoring the responses
+    scores = {
+        "chatgpt": score_response(chatgpt_response),
+        "gemini": score_response(gemini_response),
+        "claude": score_response(claude_response) if not claude_response.startswith("Claude API") else 0
+    }
+
+    # Store responses in dictionary
+    responses = {
+        "chatgpt": {"response": chatgpt_response, "score": scores["chatgpt"]},
+        "gemini": {"response": gemini_response, "score": scores["gemini"]},
+        "claude": {"response": claude_response, "score": scores["claude"]}
+    }
+
+    # Sort responses based on scores (highest first)
+    ranked_responses = dict(sorted(responses.items(), key=lambda item: item[1]["score"], reverse=True))
+
+    # Store in Firestore
     db.collection("submissions").add({
         "user_email": email,
         "question": question,
-        "chatgpt_response": chatgpt_response,
-        "gemini_response": gemini_response,
-        "claude_response": claude_response,
-        "timestamp": datetime.datetime.utcnow()
+        "responses": responses,
+        "timestamp": datetime.datetime.now(datetime.timezone.utc)
     })
 
-    return jsonify({
-        "chatgpt_response": chatgpt_response,
-        "gemini_response": gemini_response,
-        "claude_response": claude_response
-    }), 200
+    # Debugging Log to Verify Response Before Returning
+    print("🔍 AI Responses BEFORE Returning:", ranked_responses)
 
-# ================================
-# 🔹 API QUERY ENDPOINT
-# ================================
+    return jsonify(ranked_responses), 200
+
 @app.route("/api/query", methods=["POST"])
 def query():
     data = request.json
     query_text = data.get("query", "")
-
-    # Example: Using chatGPT model to process the query
     response = chatGPT(query_text)
-
     return jsonify({"response": response}), 200
 
-# ================================
-# 🔹 ADD TEST DATA TO FIRESTORE
-# ================================
 @app.route("/add_test_data", methods=["POST"])
 def add_test_data():
     test_data = {
         "email": "testuser@example.com",
         "question": "What is the capital of France?",
         "response": "Paris",
-        "timestamp": datetime.datetime.utcnow()
+        "timestamp": datetime.datetime.now(datetime.timezone.utc)
     }
     db.collection("submissions").add(test_data)
     return jsonify({"message": "Test data added successfully!"}), 200
 
-# ================================
-# 🔹 RUN FLASK APP
-# ================================
+def score_response(response):
+    return len(response)  # Simple example: longer responses score higher
+
 if __name__ == "__main__":
     app.run(debug=True)

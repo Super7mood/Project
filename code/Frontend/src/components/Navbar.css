@@ -34,3 +34,28 @@
     background-color: #155cb0;
   }
   
+  .user-info {
+    font-weight: bold;
+    color: white;
+    padding: 10px;
+  }
+  
+  .logout-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .logout-btn:hover {
+    background-color: darkred;
+  }
+  .user-info {
+    font-weight: normal; /* Less bold */
+    font-size: 14px; /* Smaller font */
+    color: rgb(255, 255, 255); /* Lighter color */
+    padding: 5px;
+  }
+  

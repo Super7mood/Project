@@ -1,0 +1,20 @@
+.ranked-responses-container {
+    margin: 20px;
+    padding: 10px;
+    background-color: #f0f0f0; /* Light grey background */
+}
+
+.response-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 5px;
+}
+
+.response-item h3 {
+    color: #333; /* Dark grey text for headers */
+}
+
+.response-item p {
+    color: #666; /* Medium grey text for paragraphs */
+}

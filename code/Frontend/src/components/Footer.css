@@ -1,11 +1,10 @@
-.footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #f4f4f9;
-    color: #333;
-    font-size: 0.9rem;
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-  }
-  
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #333; /* Change to your footer background color */
+  color: white;
+  padding: 10px;
+  text-align: center;
+}

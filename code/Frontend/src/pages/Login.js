@@ -31,6 +31,8 @@ function Login() {
 
       if (res.ok) {
         console.log("✅ Login successful:", data);
+        localStorage.setItem("loggedInUser", email);
+        window.dispatchEvent(new Event("storage")); // Force navbar to update instantly
         navigate("/ask"); // Redirect after successful login
       } else {
         setError(data.message || "Login failed. Please check your credentials.");

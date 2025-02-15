@@ -1,0 +1,11 @@
+1- Technical manual to document the work, link to it in technical_manual folder.
+
+2- LLM can return a normal answer or just a Number, using this file "code/backend/llm/liveTest.py"
+
+3- to be able to run python files, you need to install dependencies "pip install -r requirements.txt", make sure you are in the backend file (Python 3.10.11 version)
+
+4- now dataset folder to format and store large number of questions and answers
+
+5- A sketch on a UI design idea in "code/Frontend/UI_desin_idea
+
+6- Suggestion to added code sources in comments in front end file, and more comments.

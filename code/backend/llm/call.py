@@ -1,14 +1,17 @@
-from chatGPT import chatGPT
-from gemini import gemini
-from claude import claude
-from prompt import prompts
+from .chatGPT import chatGPT
+from .gemini import gemini
+from .claude import claude
+from .prompt import prompts
+from .cmdCall import cmdCall
 import time
 import threading
 
-def callChatbots(prompt, responseType=None):
+
+
+def callChatBots(prompt, responseType="Default"):
     s = time.time() # stores the starting time of function calling
 
-    llmFunc = [(chatGPT, "chatGPT"), (gemini, "Gemini"), (claude, "Claude")] # contains the chatbot calling functions and its name
+    llmFunc = [(chatGPT, "ChatGPT"), (gemini, "Gemini"), (claude, "Claude")] # contains the chatbot calling functions and its name
 
     #code for storing results from threads is from "https://stackoverflow.com/questions/6893968/how-to-get-the-return-value-from-a-thread#:~:text=You%20can%20call%20the%20result,value%20of%20the%20thread's%20function".
 
@@ -23,7 +26,7 @@ def callChatbots(prompt, responseType=None):
     threads = [] # stores the threads
     results = {} # stores the results
     for func, name in llmFunc:
-        thread = threading.Thread(target=chatbot, args=(func, name, prompt, prompts[responseType], results)) #creats a thread of an individual chatbot call
+        thread = threading.Thread(target=chatbot, args=(func, name, prompt, responseType, results)) #creats a thread of an individual chatbot call
         thread.start() # start running the thread
         threads.append(thread) # storing the thread in an array
 
@@ -32,10 +35,5 @@ def callChatbots(prompt, responseType=None):
 
     
     e = time.time()
-
-    # overallTime = round(e - s, 2) # time taken to get all responses
-
-    # print(f"Overall time: {overallTime}")
+    
     return results
-
-

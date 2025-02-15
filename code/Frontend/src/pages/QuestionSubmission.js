@@ -1,40 +1,59 @@
-// Ayoub comment:
-// To do: if possible try to comment as many lines as possible so it will look more nice and it will be easier for me to understand
-
 import { useState, useEffect } from "react";
-import { db } from "../firebase"; // ✅ Correct path based on your structure
-import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
+import { collection, addDoc, query, where, orderBy, onSnapshot } from "firebase/firestore";
+import RankedResponses from "../components/RankedResponses";
+
+import "../styles.css";
 
 function QuestionSubmission() {
-  const [queryText, setQueryText] = useState("");
-  const [response, setResponse] = useState("");
-  const [error, setError] = useState("");
-  const [submissions, setSubmissions] = useState([]); // Stores previous questions
+  const [queryText, setQueryText] = useState(""); // Stores the user's question input
+  const [response, setResponse] = useState([]); // Stores multiple AI responses
+  const [error, setError] = useState(""); // Stores error messages
+  const [submissions, setSubmissions] = useState([]); // Stores previous questions for the logged-in user
+  const [showPrevious, setShowPrevious] = useState(false); // Toggle visibility for previous submissions
 
-  // 🔹 Fetch previous submissions in real-time
+  let userIdentifier = localStorage.getItem("loggedInUser");
+  if (!userIdentifier) {
+    if (!localStorage.getItem("guestID")) {
+      localStorage.setItem("guestID", `guest-${Math.random().toString(36).substr(2, 9)}`);
+    }
+    userIdentifier = localStorage.getItem("guestID");
+  }
+
   useEffect(() => {
-    const q = query(collection(db, "submissions"), orderBy("timestamp", "desc"));
+    if (!userIdentifier) return;
+
+    const q = query(
+      collection(db, "submissions"),
+      where("user", "==", userIdentifier),
+      orderBy("timestamp", "desc")
+    );
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setSubmissions(snapshot.docs.map(doc => ({
+      const fetchedSubmissions = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
-      })));
+        ...doc.data(),
+      }));
+
+      console.log("Fetched Previous Submissions:", fetchedSubmissions);
+      setSubmissions(fetchedSubmissions);
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
-  }, []);
+    return () => unsubscribe();
+  }, [userIdentifier]);
 
-  // 🔹 Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      // Send question to Flask backend
-      const res = await fetch("http://127.0.0.1:5000/api/query", {
+      const res = await fetch("http://127.0.0.1:5000/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: queryText }),
+        body: JSON.stringify({
+          question: queryText,
+          email: userIdentifier,
+        }),
       });
 
       if (!res.ok) {
@@ -42,18 +61,26 @@ function QuestionSubmission() {
       }
 
       const data = await res.json();
-      setResponse(data.response);
+      console.log("Received Data from Backend:", data); // Debugging log
+      
+      let newResponses = Object.entries(data).map(([model, responseDetails]) => ({
+        model,
+        response: typeof responseDetails === "object" && responseDetails.response 
+            ? responseDetails.response 
+            : responseDetails || "No response available",
+        score: responseDetails?.score !== undefined ? responseDetails.score : "N/A"
+      }));
 
-      // 🔹 Store query & response in Firestore
       await addDoc(collection(db, "submissions"), {
+        user: userIdentifier,
         query: queryText,
-        response: data.response,
+        responses: data,
         timestamp: new Date(),
       });
 
-      console.log("✅ Submission stored in Firestore!");
-      setQueryText(""); // Clear input after submission
-
+      console.log(`✅ Submission stored in Firestore for ${userIdentifier}`);
+      setQueryText("");
+      setResponse(newResponses);
     } catch (err) {
       console.error("Error:", err);
       setError("Error connecting to the backend.");
@@ -63,8 +90,6 @@ function QuestionSubmission() {
   return (
     <div className="container">
       <h1>Ask AI-Checker Pro</h1>
-
-      {/* 🔹 Submission Form */}
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -75,27 +100,48 @@ function QuestionSubmission() {
         />
         <button type="submit">Submit</button>
       </form>
-
-      {/* 🔹 Display Error if Any */}
       {error && <p className="error">{error}</p>}
-
-      {/* 🔹 AI Response */}
-      <div>
-        <h2>Response:</h2>
-        <p>{response || "No response yet."}</p>
+      <div className="response-container">
+        <h2>Latest Response:</h2>
+        {response.length === 0 ? (
+          <p>No response yet.</p>
+        ) : (
+          response.map((res, index) => (
+            <div key={index} className={`response-box ${res.model.toLowerCase()}`}>
+              <h3>{res.model}</h3>
+              <p>Response: {res.response}</p>
+              <p>Score: {res.score}</p>
+            </div>
+          ))
+        )}
       </div>
-
-      {/* 🔹 Display Previous Submissions */}
-      <h2>Previous Submissions</h2>
-      <ul>
-        {submissions.map((submission) => (
-          <li key={submission.id}>
-            <strong>Question:</strong> {submission.query} <br />
-            <strong>Response:</strong> {submission.response} <br />
-            <small>🕒 {new Date(submission.timestamp.toDate()).toLocaleString()}</small>
-          </li>
-        ))}
-      </ul>
+      <button className="toggle-btn" onClick={() => setShowPrevious(!showPrevious)}>
+        {showPrevious ? "Hide Previous Responses" : "View Previous Responses"}
+      </button>
+      {showPrevious && (
+        <div className="previous-submissions">
+          <h2>Your Previous Submissions</h2>
+          {submissions.length === 0 ? (
+            <p>No previous submissions found.</p>
+          ) : (
+            submissions.map((submission) => (
+              <div key={submission.id} className="response-box previous-response-box">
+                <h3>Question:</h3>
+                <p>{submission.query}</p>
+                <h3>AI Responses:</h3>
+                {Object.entries(submission.responses).map(([model, responseDetails], index) => (
+                  <div key={index} className={`response-box ${model.toLowerCase()}`}>
+                    <h4>{model}</h4>
+                    <p>Response: {typeof responseDetails === "object" && responseDetails.response ? responseDetails.response : responseDetails || "No response available"}</p>
+                    <p>Score: {responseDetails?.score !== undefined ? responseDetails.score : "N/A"}</p>
+                  </div>
+                ))}
+                <small>🕒 {submission.timestamp?.toDate ? new Date(submission.timestamp.toDate()).toLocaleString() : "N/A"}</small>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

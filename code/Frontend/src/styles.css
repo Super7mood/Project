@@ -58,3 +58,95 @@ input {
   color: red;
   font-size: 0.9rem;
 }
+
+/* 🔹 Improved AI Response Styling */
+.response-container {
+  margin-top: 20px;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 10px;
+  text-align: left;
+  max-width: 600px;
+  margin: auto;
+}
+
+/* 🔹 AI Response Box */
+.response-box {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;      /* Ensure long words wrap correctly */
+  white-space: pre-wrap;      /* Preserve whitespace formatting */
+  overflow-wrap: break-word;  /* Allow word breaking */
+  max-width: 100%;
+  animation: fadeIn 0.5s ease-in-out; /* Smooth fade-in effect */
+}
+
+/* 🔹 ChatGPT Response - Green */
+.chatgpt {
+  background: #e6ffe6;
+  border-left: 6px solid #33cc33;
+}
+
+/* 🔹 Gemini Response - Blue */
+.gemini {
+  background: #e6f0ff;
+  border-left: 6px solid #3366cc;
+}
+
+/* 🔹 Claude Response - Orange */
+.claude {
+  background: #fff3e6;
+  border-left: 6px solid #ff6600;
+}
+
+/* 🔹 Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Previous Submissions */
+.previous-submissions {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-height: 400px; /* Limit height of this section */
+  overflow-y: auto; /* Allow scrolling if there are too many submissions */
+}
+
+.previous-submissions h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.previous-submissions ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.previous-submissions li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.previous-submissions li:last-child {
+  border-bottom: none; /* Remove border from the last item */
+}
+
+.previous-submissions small {
+  font-size: 0.9rem;
+  color: #888;
+}
